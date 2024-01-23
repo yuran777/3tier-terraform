@@ -21,7 +21,7 @@ resource "aws_lb_target_group" "external-lb-tg"{
   target_type = "instance"
   
   health_check {
-    path = "/index.html" 
+    path = "/" 
     protocol = "HTTP"
     healthy_threshold  = 2 # 헬스 체크 문제 시, 정상 요청 반환이 될때까지의 최대 재요청 수(정상 간주)
     unhealthy_threshold = 2 # 헬스 체크 문제 시, 최대 실패 횟수 Limit
@@ -83,7 +83,7 @@ resource "aws_lb_target_group" "internal-lb-tg"{
   target_type = "instance"
   
   health_check {
-    path = "/root/index.jsp" # 앞서 AppInstance 사전 구축 시, curl로 헬스 체크 테스트했던 경로
+    path = "/" # 앞서 AppInstance 사전 구축 시, curl로 헬스 체크 테스트했던 경로
     protocol = "HTTP"
     healthy_threshold  = 2 # 헬스 체크 문제 시, 정상 요청 반환이 될때까지의 최대 재요청 수(정상 간주)
     unhealthy_threshold = 2 # 헬스 체크 문제 시, 최대 실패 횟수 Limit

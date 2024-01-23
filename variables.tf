@@ -53,12 +53,14 @@ variable "keypair" {
   description = "keypair for the ec2 instances"
 }
 
-# variable "master-username" {
-#   type        = string
-#   description = "RDS Username for the Database"
-# }
+variable "master-username" {
+  type        = string
+  description = "RDS Username for the Database"
+  default = "yuran"
+}
 
-# variable "master-password" {
-#   type        = string
-#   description = "RDS Password for the Database"
-# }
+variable "master-password" {
+  type        = string
+  description = "RDS Password for the Database"
+  default = "yuranyuran"
+}

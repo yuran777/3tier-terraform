@@ -138,98 +138,100 @@ resource "aws_security_group" "internal-alb-sg" {
 
 # was 보안 그룹 생성
 resource "aws_security_group" "was-sg" {
-  name = "was-sg"
+  name        = "was-sg"
   description = "was sg"
-  vpc_id = aws_vpc.yuran-test-vpc.id
+  vpc_id      = aws_vpc.yuran-test-vpc.id
 
   ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
+    description      = "SSH"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    security_groups  = [aws_security_group.bastion_sg.id]
+  }
+
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
     protocol    = "tcp"
-    security_groups = [aws_security_group.bastion_sg.id]
-  }
-
-  ingress {
-    from_port = 8080
-    to_port = 8080
-    protocol = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
   ingress {
-    from_port = 8080
-    to_port = 8080
-    protocol = "tcp"
-    security_groups = [aws_security_group.internal-alb-sg.id]
-    # 내부 ALB SG와 전체 주소 허용이 된, 4000TCP 포트로 트래픽 수신 설정
-    # 해당 4000번 포트는 ALB LB Target Group Register Port로 설정 사항에 따라 변동 가능
+    from_port        = 8080
+    to_port          = 8080
+    protocol         = "tcp"
+    security_groups  = [aws_security_group.internal-alb-sg.id]
   }
 
-    ingress {
-    from_port = 8080
-    to_port = 8080
-    protocol = "tcp"
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
     cidr_blocks = ["10.10.4.0/24"]
-    }
-
-    ingress {
-    from_port = 8080
-    to_port = 8080
-    protocol = "tcp"
-    cidr_blocks = ["10.10.5.0/24"]
-    # 내부 ALB SG와 전체 주소 허용이 된, 4000TCP 포트로 트래픽 수신 설정
-    # 해당 4000번 포트는 ALB LB Target Group Register Port로 설정 사항에 따라 변동 가능
   }
 
-  egress { 
-    from_port = 0
-    to_port = 0
-    protocol = "-1" 
-    cidr_blocks = ["0.0.0.0/0"]
+  ingress {
+    from_port   = 8080
+    to_port     = 8080
+    protocol    = "tcp"
+    cidr_blocks = ["10.10.5.0/24"]
+  }
+
+  ingress {
+    from_port        = 3306
+    to_port          = 3306
+    protocol         = "tcp"
+    security_groups  = [aws_security_group.bastion_sg.id]
+  }
+
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
 
   tags = {
-      Name = format("%s-was-sg", var.name)
-  }  
+    Name = format("%s-was-sg", var.name)
+  }
 }
 
 # DB 보안 그룹 생성
 resource "aws_security_group" "db-sg" {
-  name = "db-sg"
+  name        = "db-sg"
   description = "database security group"
-  vpc_id = aws_vpc.yuran-test-vpc.id
+  vpc_id      = aws_vpc.yuran-test-vpc.id
 
   ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    security_groups = [aws_security_group.bastion_sg.id]
+    description      = "SSH"
+    from_port        = 22
+    to_port          = 22
+    protocol         = "tcp"
+    security_groups  = [aws_security_group.bastion_sg.id]
   }
 
   ingress {
-    from_port = 3306
-    to_port = 3306
-    protocol = "tcp"
-    security_groups = [aws_security_group.External-alb-sg.id]
-    # 처음에 생성한 External ALB SG를 Inbound로 허용하도록 구성
+    description      = "MYSQL"
+    from_port        = 3306
+    to_port          = 3306
+    protocol         = "tcp"
+    security_groups  = [aws_security_group.bastion_sg.id]
   }
 
-    ingress {
-    from_port = 3306
-    to_port = 3306
-    protocol = "tcp"
-    security_groups = [aws_security_group.was-sg.id]
-    # 처음에 생성한 External ALB SG를 Inbound로 허용하도록 구성
+  ingress {
+    from_port        = 3306
+    to_port          = 3306
+    protocol         = "tcp"
+    security_groups  = [aws_security_group.was-sg.id]
   }
 
   egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1" # Protocol -1은 전체 프로토콜을 의미
-    cidr_blocks = ["0.0.0.0/0"]
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
   }
 
